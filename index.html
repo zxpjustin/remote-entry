@@ -7,14 +7,30 @@ body{margin:0;background:#f2f6f3;color:#18392f;font:16px/1.8 system-ui,"Microsof
 </style></head><body><main>
 <h1>远程工作台</h1>
 <p>请收藏本页。每次家里电脑开启服务后，这里会更新到最新入口。</p>
-<a href="https://rear-replied-holland-bless.trycloudflare.com" rel="noreferrer">进入工作台 →</a>
-<small>入口更新时间：2026-11-12 16:31:42 UTC</small><br><code>https://rear-replied-holland-bless.trycloudflare.com</code>
+<a id="enter" href="https://rear-replied-holland-bless.trycloudflare.com" rel="noreferrer">进入工作台 →</a>
+<small>入口更新时间：2026-11-12 16:36:26 UTC</small><br><code>https://rear-replied-holland-bless.trycloudflare.com</code>
 <p>本页不表示服务当前在线。如果无法进入，请确认家里电脑的服务已开启；刚开启时请稍等发布完成，再刷新本页。</p>
 <button id="refresh" type="button">刷新入口</button>
 <script>
 /** @brief 通过新查询参数重新读取入口，避免使用旧缓存。 */
 function refreshEntry(){location.replace(location.pathname+'?refresh='+Date.now());}
 document.getElementById('refresh').addEventListener('click',refreshEntry);
+/** @brief 点击时重新读取最新入口，读取失败时不跳转到可能已失效的旧地址。 @param event 点击事件。 */
+async function enterLatest(event){
+  event.preventDefault();
+  const link=document.getElementById('enter');
+  if(link.dataset.busy)return;
+  link.dataset.busy='1';link.textContent='正在获取最新入口…';
+  try{
+    const response=await fetch(location.pathname+'?latest='+Date.now(),{cache:'no-store'});
+    if(!response.ok)throw new Error('读取失败');
+    const page=new DOMParser().parseFromString(await response.text(),'text/html');
+    const target=page.querySelector('#enter')?.getAttribute('href');
+    if(!/^https:\/\/[a-z0-9]+(?:-[a-z0-9]+)*\.trycloudflare\.com$/.test(target||''))throw new Error('入口无效');
+    location.assign(target);
+  }catch(error){link.textContent='无法获取最新入口，请稍后重试';delete link.dataset.busy;}
+}
+document.getElementById('enter').addEventListener('click',enterLatest);
 </script>
 <small>登录密码只在进入工作台后输入。聊天内容不经过本页。</small>
 </main></body></html>
